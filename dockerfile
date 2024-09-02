@@ -1,41 +1,17 @@
-FROM nvidia/cuda:11.7.1-base-ubuntu22.04
+# Use an official Python runtime as a parent image
+FROM python:3.10-slim
 
-# Avoid prompts from apt
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install Python and pip
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-dev \
-    wget \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
+# Set the working directory in the container
 WORKDIR /app
 
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip
+# Copy the current directory contents into the container at /app
+COPY . /app
 
-# Install PyTorch with CUDA support
-RUN pip3 install torch torchvision torchaudio --extra-index-url https://download.pytorch.org/whl/cu117
+# Install any needed packages specified in requirements.txt
+RUN pip install --no-cache-dir fastapi uvicorn
 
-# Copy requirements.txt first to leverage Docker caching for dependencies
-COPY requirements.txt .
+# Make port 8000 available to the world outside this container
+EXPOSE 8000
 
-# Install Python dependencies
-RUN pip3 install -r requirements.txt
-
-# Clone SAM 2 repository and install it
-RUN git clone https://github.com/facebookresearch/segment-anything-2.git \
-    && cd segment-anything-2 && pip install -e .
-
-# Download SAM 2 checkpoint
-RUN mkdir -p checkpoints \
-    && wget -O checkpoints/sam2_hiera_small.pt https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_small.pt
-
-# Copy the rest of the application code
-COPY . .
-
-# Run your application
-CMD ["python3", "main.py"]
+# Run app.py when the container launches
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
