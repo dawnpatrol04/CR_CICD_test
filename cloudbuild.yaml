@@ -1,16 +1,16 @@
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/gen-ai-testing-412918/your-image-name', '.']
+    args: ['build', '-t', 'gcr.io/gen-ai-testing-412918/cr_cicd_test-image', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/gen-ai-testing-412918/your-image-name']
+    args: ['push', 'gcr.io/gen-ai-testing-412918/cr_cicd_test-image']
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - 'run'
       - 'deploy'
-      - 'your-service-name'
+      - 'cr-cicd-test-service'
       - '--image'
-      - 'gcr.io/gen-ai-testing-412918/your-image-name'
+      - 'gcr.io/gen-ai-testing-412918/cr_cicd_test-image'
       - '--platform'
       - 'managed'
       - '--region'
@@ -24,6 +24,8 @@ steps:
       - '5'
       - '--timeout'
       - '300s'
+      - '--min-instances'
+      - '0'
 
 images:
-  - 'gcr.io/gen-ai-testing-412918/your-image-name'
+  - 'gcr.io/gen-ai-testing-412918/cr_cicd_test-image'
